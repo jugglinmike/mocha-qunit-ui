@@ -7,7 +7,8 @@ Mocha ships with a QUnit interface, but it lacks assertions, support for expect(
 
 ##Usage
 Mocha doesn't currently support loading external interfaces from the command line, so for now, you need to use Mocha progamatically to use this interface.
-```var Mocha = require('mocha');
+```
+var Mocha = require('mocha');
 //Add the interface
 Mocha.interfaces["qunit-mocha-ui"] = require("qunit-mocha-ui");
 //Tell mocha to use the interface.
@@ -17,7 +18,8 @@ mocha.addFile("path/to/my/testfile.js");
 //Run your tests
 mocha.run(function(failures){
   process.exit(failures);
-});```
+});
+```
 
 ##Cool stuff
 You can mix and match Mocha features with QUnit.  The `done` parameter works, so you can call it instead of `start`, and you have access to the currently running test object with the `this` keyword inside the test function, just like in Mocha.
@@ -36,6 +38,10 @@ test("my long test", function (done){
 * You have to use `suite` instead of `module` in your QUnit tests to declare a module.  This is unlikely to be fixed because `module` is a reserved word in node.js
 * The QUnit object is not currently exposed 
 * `start` and `stop` QUnit methods support is not a complete match for QUnit's behavior.  You can't start a module more than once, as internally start is mapped to Mocha's `done`.
+
+##Running tests
+Just run `npm test` from the project folder, or run `node testrunner.js`
+The tests are all written using this interface, so you may want to peek at them for more examples.
 
 ##License:
 Copyright (c) 2013 Ian Taylor
