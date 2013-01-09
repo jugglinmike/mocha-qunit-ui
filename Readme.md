@@ -1,6 +1,6 @@
 A QUnit Interface for Mocha that supports all QUnit's assertion types.
 
-Mocha ships with a QUnit interface, but it lacks assertions, support for expect(), and the asyncTest method.  This is an alternate QUnit interface that supports all of those things, and is designed to be run inside of a node.js environment.  The goal is to get as close as possible to being able to run QUnit tests unaltered in Mocha.
+Mocha ships with a QUnit interface, but it lacks assertions, support for `expect()`, and the `asyncTest` method.  This is an alternate QUnit interface that supports all of those things, and is designed to be run inside of a node.js environment.  The goal is to get as close as possible to being able to run QUnit tests unaltered in Mocha.
 
 ##Installation
 ```npm install qunit-mocha-ui```
