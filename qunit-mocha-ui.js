@@ -105,8 +105,7 @@ module.exports = function(suite){
 
     /** Define all of the QUnit Assertions based of their node.js equivalents */
     ["deepEqual", "equal", "notDeepEqual", "notEqual",
-      "notStrictEqual", "ok", "strictEqual",
-      "throws", "raises"].forEach(function (k){
+      "notStrictEqual","ok","strictEqual","throws"].forEach(function (k){
       context[k] = function (){
         assertionCount++;
         assert[k].apply(null, arguments);
