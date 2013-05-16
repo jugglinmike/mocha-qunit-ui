@@ -105,12 +105,16 @@ module.exports = function(suite){
 
     /** Define all of the QUnit Assertions based of their node.js equivalents */
     ["deepEqual", "equal", "notDeepEqual", "notEqual",
-     "notStrictEqual","ok","strictEqual","throws"].forEach(function (k){
+      "notStrictEqual", "ok", "strictEqual",
+      "throws", "raises"].forEach(function (k){
       context[k] = function (){
         assertionCount++;
         assert[k].apply(null, arguments);
       }
     });
+
+    // Deprecated since QUnit v1.9.0, but still used, e.g. by Backbone.
+    context.raises = context.throws
 
     /** 
     * Checks to see if the assertion counts indicate a failure.  
