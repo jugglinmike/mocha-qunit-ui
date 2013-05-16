@@ -130,3 +130,24 @@ test("This non asyncTest calls stop() then start() 100 ms later.", function (){
     start();
   }, 100)
 });
+
+var ranBefore = false;
+var ranAfter = false;
+suite("lifecycle tests", {
+  setup: function (){
+    ranBefore = true;
+  },
+  teardown: function (){
+    ranAfter = true;
+  }
+});
+test("lifecycle object setup works", function (){
+  expect(2);
+  ok(ranBefore);
+  ok(!ranAfter);
+});
+test("lifecycle object teardown works", function (){
+  expect(2);
+  ok(ranBefore);
+  ok(ranAfter);
+})
