@@ -32,34 +32,32 @@ test( "strictEqual test", function() {
   strictEqual( 1, 1, "1 and 1 are the same value and type" );
 });
 
-test( "throws", function() {
-  function CustomError( message ) {
-    this.message = message;
+var testThrows = function(assert) {
+  return function() {
+    function CustomError( message ) { this.message = message; }
+    CustomError.prototype.toString = function() { return this.message; };
+
+    assert(
+      function() { throw "error" },
+      "throws with just a message, no expected"
+    );
+
+    assert(
+      function() { throw new CustomError; },
+      CustomError,
+      "raised error is an instance of CustomError"
+    );
+
+    assert(
+      function() { throw new CustomError("some error description"); },
+      /description/,
+      "raised error message contains 'description'"
+    );
   }
-  CustomError.prototype.toString = function() {
-    return this.message;
-  };
-  throws(
-    function() {
-        throw "error"
-    },
-    "throws with just a message, no expected"
-  );
-  throws(
-    function() {
-        throw new CustomError();
-    },
-    CustomError,
-    "raised error is an instance of CustomError"
-  );
-  throws(
-    function() {
-        throw new CustomError("some error description");
-    },
-    /description/,
-    "raised error message contains 'description'"
-  );
-});
+}
+
+test("throws", testThrows(global.throws));
+test("raises", testThrows(global.raises));
 
 suite("Positive tests for expect");
 test('expect succeeds', function (){
