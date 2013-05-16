@@ -83,8 +83,11 @@ module.exports = function(suite){
       var suite = Suite.create(suites[0], title);
       suites.unshift(suite);
 
-      if (opts && opts.setup) suite.beforeEach(opts.setup);
-      if (opts && opts.teardown) suite.afterEach(opts.teardown);
+      if (opts) {
+        suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
+        if (opts.setup) suite.beforeEach(opts.setup);
+        if (opts.teardown) suite.afterEach(opts.teardown);
+      }
     };
 
     /** 
