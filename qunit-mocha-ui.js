@@ -78,10 +78,16 @@ module.exports = function(suite){
      * Describe a "suite" with the given `title`.
      */
   
-    context.suite = function(title){
+    context.suite = function(title, opts){
       if (suites.length > 1) suites.shift();
       var suite = Suite.create(suites[0], title);
       suites.unshift(suite);
+
+      if (opts) {
+        suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
+        if (opts.setup) suite.beforeEach(opts.setup);
+        if (opts.teardown) suite.afterEach(opts.teardown);
+      }
     };
 
     /** 
