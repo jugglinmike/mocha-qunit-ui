@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 
-var Mocha = require("mocha");
+var Mocha = module.parent.require("mocha");
 var Suite = Mocha.Suite
   , Test = Mocha.Test
   , assert = require("assert");
