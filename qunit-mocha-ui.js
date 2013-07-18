@@ -3,7 +3,13 @@
  * Module dependencies.
  */
 
-var Mocha = module.parent.require("mocha");
+
+var Mocha;
+if(module.parent){
+  Mocha = module.parent.require("mocha");
+}else{
+  Mocha = window.Mocha;
+}
 var Suite = Mocha.Suite
   , Test = Mocha.Test
   , assert = require("assert");
