@@ -13,6 +13,9 @@
     "grunt-browserify": "~1.2.0",
     "mocha": "~1.12.0"
   },
+  "peerDependencies": {
+    "mocha": "~1.12.0"
+  },
   "main": "qunit-mocha-ui.js",
   "scripts": {
     "test": "grunt"
