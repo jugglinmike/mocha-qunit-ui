@@ -8,9 +8,8 @@ Mocha ships with a QUnit interface, but it lacks assertions, support for `expect
 ##Usage
 Mocha doesn't currently support loading external interfaces from the command line, so for now, you need to use Mocha progamatically to use this interface.
 ```
-var Mocha = require('mocha');
-//Add the interface
-Mocha.interfaces["qunit-mocha-ui"] = require("qunit-mocha-ui");
+//Load qunit-mocha-ui
+require("qunit-mocha-ui");
 //Tell mocha to use the interface.
 var mocha = new Mocha({ui:"qunit-mocha-ui", reporter:"spec"});
 //Add your test files
@@ -19,6 +18,51 @@ mocha.addFile("path/to/my/testfile.js");
 mocha.run(function(failures){
   process.exit(failures);
 });
+```
+You can also use qunit-mocha-ui from Grunt with the `grunt-mocha-test` task.
+Here's an example Gruntfile.js
+```
+module.exports = function(grunt) {
+  grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.initConfig({
+    mochaTest: {
+      test:{
+        options:{reporter:"spec", require:"qunit-mocha-ui", ui:"qunit-mocha-ui"},
+        src:["test/mytest.js"]
+      }
+    }
+  });
+  grunt.registerTask('default', ['mochaTest']);
+};
+```
+
+You can even use qunit-mocha-ui from in the browser, by using the browserified js file:
+`qunit-mocha-ui-browser.js` (in this directory)
+```
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Browserified test</title>
+    <script src="path/to/mocha.js"></script>
+    <script src="qunit-mocha-ui-browser.js"></script>
+    <script>
+      mocha.setup({ui:"qunit-mocha-ui"});
+    </script>
+    <link rel="stylesheet" type="text/css" href="path/to/mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script>
+      suite("On page test!");
+      test("An awesome QUnit style test", 2, function (){
+        ok(true);
+        equal(1, parseInt("1"));
+      });
+      mocha.run();
+    </script>
+  </body>
+</html>
 ```
 
 ##Cool stuff

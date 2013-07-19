@@ -189,6 +189,11 @@ module.exports = function(suite){
           }
         }
       }
+      //this little business makes it so that the Mocha HTML reporter
+      //shows the correct function bodies.
+      newFn.toString = function (){
+        return fn.toString();
+      }
       suites[0].addTest(new Test(title, newFn));
     };
 
@@ -196,3 +201,5 @@ module.exports = function(suite){
 
   });
 };
+
+Mocha.interfaces["qunit-mocha-ui"] = module.exports;
