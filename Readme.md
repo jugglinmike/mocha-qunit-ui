@@ -1,9 +1,9 @@
 A QUnit Interface for Mocha that supports all QUnit's assertion types.
 
-Mocha ships with a QUnit interface, but it lacks assertions, support for `expect()`, and the `asyncTest` method.  This is an alternate QUnit interface that supports all of those things, and is designed to be run inside of a node.js environment.  The goal is to get as close as possible to being able to run QUnit tests unaltered in Mocha.
+Mocha ships with a QUnit interface, but it lacks assertions, support for `expect()`, and the `asyncTest` method.  This is an alternate QUnit interface that supports all of those things, and can be run either in node.js or the browser.  The goal is to get as close as possible to being able to run QUnit tests unaltered in Mocha.
 
 ##Installation
-```npm install qunit-mocha-ui```
+```npm install qunit-mocha-ui --save-dev```
 
 ##Usage
 Mocha doesn't currently support loading external interfaces from the command line, so for now, you need to use Mocha progamatically to use this interface.
@@ -36,8 +36,8 @@ module.exports = function(grunt) {
 };
 ```
 
-You can even use qunit-mocha-ui from in the browser, by using the browserified js file:
-`qunit-mocha-ui-browser.js` (in this directory)
+You can even use qunit-mocha-ui from in the browser, by using the included browserified js file:
+`qunit-mocha-ui-browser.js`
 ```
 <!doctype html>
 <html>
