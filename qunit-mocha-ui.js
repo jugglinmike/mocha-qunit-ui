@@ -44,7 +44,9 @@ module.exports = function(suite){
 
   var assertionCount;
   var expectedAssertions;
+  var deferrals;
   var currentDoneFn;
+  var checkingDeferrals;
 
   suite.on('pre-require', function(context){
 
@@ -132,72 +134,80 @@ module.exports = function(suite){
       return null;
     };
 
-    /* We're going to say that starting a stopped QUnit test is equivalent to calling mocha's done() */
     context.start = function (){
-      if(currentDoneFn){
-        currentDoneFn();
+      deferrals--;
+      if (deferrals === 0 && !checkingDeferrals) {
+        checkingDeferrals = true;
+        process.nextTick(function() {
+          checkingDeferrals = false;
+          if (deferrals === 0 && currentDoneFn) {
+            currentDoneFn();
+          }
+        });
+      } else if (deferrals < 0) {
+        throw new Error("cannot call start() when not stopped");
       }
     };
 
     context.stop = function (){
-      //do nothing, this is here for compatibility only.
+      deferrals++;
     };
 
-    /** 
-    * A naive way of determining if the test function uses the "start" or 
-    * "stop" functions of QUnit.
-    */
+    function normalizeTestArgs(fn) {
+      return function(title, expect, test) {
+        if (typeof expect == "function") {
+          test = expect;
+          expect = 0;
+        }
 
-    var fnHasStartStop = function (fn){
-      var fnText = fn.toString();
-      var startRegex = /[\s;](start\s?\([^)]*?\))/;
-      var stopRegex = /[\s;](stop\s?\([^)]*?\))/;
-      var hasStart = startRegex.test(fnText); 
-      var hasStop = stopRegex.test(fnText);
-      return hasStart || hasStop;
-    };
+        return fn.call(this, title, expect, test);
+      };
+    }
+
+    function wrapTestFunction(test, wrapper) {
+      var result = function(done) {
+        return wrapper.call(this, test, done);
+      };
+      result.toString = test.toString.bind(test);
+      return result;
+    }
+
+    function addTest(title, expect, test) {
+      suites[0].addTest(new Test(title, wrapTestFunction(test, function(test, done) {
+        deferrals = 0;
+        checkingDeferrals = false;
+        expectedAssertions = expect;
+        assertionCount = 0;
+        currentDoneFn = function() {
+          done(checkAssertionCount());
+          currentDoneFn = null;
+        };
+        context.stop();
+        test.call(this, currentDoneFn);
+        context.start();
+      })));
+    }
 
     /**
      * Describe a specification or test-case
      * with the given `title`, an optional number of assertions to expect,
-     * callback `fn` acting as a thunk.
+     * callback `test` acting as a thunk.
      */
-    context.test = function(title, expect, fn){
-      if(typeof expect == "function"){
-        fn = expect;
-        expect = 0;
+    context.test = normalizeTestArgs(function(title, expect, test) {
+      if (test.length) {
+        // it takes an argument, assumed to be the done function, so it's really an async test
+        context.asyncTest(title, expect, test);
+      } else {
+        addTest(title, expect, test);
       }
-      var newFn;
-      if(fn.length || fnHasStartStop(fn)){
-        newFn = function (done){
-          expectedAssertions = expect;
-          assertionCount = 0;
-          var newDone = function (err){
-            done(err || checkAssertionCount());
-          };
-          currentDoneFn = newDone;
-          fn.bind(this)(newDone);
-        }
-      }else{
-        newFn = function (){
-          expectedAssertions = expect;
-          assertionCount = 0;
-          fn.bind(this)();
-          var countError= checkAssertionCount();
-          if(countError){
-            throw countError;
-          }
-        }
-      }
-      //this little business makes it so that the Mocha HTML reporter
-      //shows the correct function bodies.
-      newFn.toString = function (){
-        return fn.toString();
-      }
-      suites[0].addTest(new Test(title, newFn));
-    };
+    });
 
-    context.asyncTest = context.test;
+    context.asyncTest = normalizeTestArgs(function(title, expect, test) {
+      addTest(title, expect, wrapTestFunction(test, function(test, done) {
+        context.stop();
+        test.call(this, done);
+      }));
+    });
 
   });
 };

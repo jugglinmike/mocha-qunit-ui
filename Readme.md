@@ -81,7 +81,6 @@ test("my long test", function (done){
 ##Known differences from QUnit API
 * You have to use `suite` instead of `module` in your QUnit tests to declare a module.  This is unlikely to be fixed because `module` is a reserved word in node.js
 * The QUnit object is not currently exposed 
-* `start` and `stop` QUnit methods support is not a complete match for QUnit's behavior.  You can't start a module more than once, as internally start is mapped to Mocha's `done`.
 
 ##Running tests
 Just run `npm test` from the project folder, or run `node testrunner.js`

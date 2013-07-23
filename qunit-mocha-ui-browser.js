@@ -1,6 +1,60 @@
 (function(e){if("function"==typeof bootstrap)bootstrap("qunitmochaui",e);else if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else if("undefined"!=typeof ses){if(!ses.ok())return;ses.makeQunitMochaUI=e}else"undefined"!=typeof window?window.qunitMochaUI=e():global.qunitMochaUI=e()})(function(){var define,ses,bootstrap,module,exports;
 return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
+// shim for using process in browser
 
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],2:[function(require,module,exports){
+(function(process){
 /**
  * Module dependencies.
  */
@@ -46,7 +100,9 @@ module.exports = function(suite){
 
   var assertionCount;
   var expectedAssertions;
+  var deferrals;
   var currentDoneFn;
+  var checkingDeferrals;
 
   suite.on('pre-require', function(context){
 
@@ -134,78 +190,88 @@ module.exports = function(suite){
       return null;
     };
 
-    /* We're going to say that starting a stopped QUnit test is equivalent to calling mocha's done() */
     context.start = function (){
-      if(currentDoneFn){
-        currentDoneFn();
+      deferrals--;
+      if (deferrals === 0 && !checkingDeferrals) {
+        checkingDeferrals = true;
+        process.nextTick(function() {
+          checkingDeferrals = false;
+          if (deferrals === 0 && currentDoneFn) {
+            currentDoneFn();
+          }
+        });
+      } else if (deferrals < 0) {
+        throw new Error("cannot call start() when not stopped");
       }
     };
 
     context.stop = function (){
-      //do nothing, this is here for compatibility only.
+      deferrals++;
     };
 
-    /** 
-    * A naive way of determining if the test function uses the "start" or 
-    * "stop" functions of QUnit.
-    */
+    function normalizeTestArgs(fn) {
+      return function(title, expect, test) {
+        if (typeof expect == "function") {
+          test = expect;
+          expect = 0;
+        }
 
-    var fnHasStartStop = function (fn){
-      var fnText = fn.toString();
-      var startRegex = /[\s;](start\s?\([^)]*?\))/;
-      var stopRegex = /[\s;](stop\s?\([^)]*?\))/;
-      var hasStart = startRegex.test(fnText); 
-      var hasStop = stopRegex.test(fnText);
-      return hasStart || hasStop;
-    };
+        return fn.call(this, title, expect, test);
+      };
+    }
+
+    function wrapTestFunction(test, wrapper) {
+      var result = function(done) {
+        return wrapper.call(this, test, done);
+      };
+      result.toString = test.toString.bind(test);
+      return result;
+    }
+
+    function addTest(title, expect, test) {
+      suites[0].addTest(new Test(title, wrapTestFunction(test, function(test, done) {
+        deferrals = 0;
+        checkingDeferrals = false;
+        expectedAssertions = expect;
+        assertionCount = 0;
+        currentDoneFn = function() {
+          done(checkAssertionCount());
+          currentDoneFn = null;
+        };
+        context.stop();
+        test.call(this, currentDoneFn);
+        context.start();
+      })));
+    }
 
     /**
      * Describe a specification or test-case
      * with the given `title`, an optional number of assertions to expect,
-     * callback `fn` acting as a thunk.
+     * callback `test` acting as a thunk.
      */
-    context.test = function(title, expect, fn){
-      if(typeof expect == "function"){
-        fn = expect;
-        expect = 0;
+    context.test = normalizeTestArgs(function(title, expect, test) {
+      if (test.length) {
+        // it takes an argument, assumed to be the done function, so it's really an async test
+        context.asyncTest(title, expect, test);
+      } else {
+        addTest(title, expect, test);
       }
-      var newFn;
-      if(fn.length || fnHasStartStop(fn)){
-        newFn = function (done){
-          expectedAssertions = expect;
-          assertionCount = 0;
-          var newDone = function (err){
-            done(err || checkAssertionCount());
-          };
-          currentDoneFn = newDone;
-          fn.bind(this)(newDone);
-        }
-      }else{
-        newFn = function (){
-          expectedAssertions = expect;
-          assertionCount = 0;
-          fn.bind(this)();
-          var countError= checkAssertionCount();
-          if(countError){
-            throw countError;
-          }
-        }
-      }
-      //this little business makes it so that the Mocha HTML reporter
-      //shows the correct function bodies.
-      newFn.toString = function (){
-        return fn.toString();
-      }
-      suites[0].addTest(new Test(title, newFn));
-    };
+    });
 
-    context.asyncTest = context.test;
+    context.asyncTest = normalizeTestArgs(function(title, expect, test) {
+      addTest(title, expect, wrapTestFunction(test, function(test, done) {
+        context.stop();
+        test.call(this, done);
+      }));
+    });
 
   });
 };
 
 Mocha.interfaces["qunit-mocha-ui"] = module.exports;
-},{"assert":2}],2:[function(require,module,exports){
+
+})(require("__browserify_process"))
+},{"__browserify_process":1,"assert":3}],3:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -522,7 +588,7 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"buffer":4,"util":3}],3:[function(require,module,exports){
+},{"buffer":5,"util":4}],4:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -875,61 +941,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],6:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],5:[function(require,module,exports){
+},{"events":6}],6:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -1115,7 +1127,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":6}],7:[function(require,module,exports){
+},{"__browserify_process":1}],7:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1201,7 +1213,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -2285,7 +2297,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":7,"assert":2,"base64-js":8}],8:[function(require,module,exports){
+},{"./buffer_ieee754":7,"assert":3,"base64-js":8}],8:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -2371,6 +2383,6 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}]},{},[1])(1)
+},{}]},{},[2])(2)
 });
 ;

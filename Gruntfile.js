@@ -15,7 +15,7 @@ module.exports = function(grunt) {
     mochaTest: {
       test:{
         options:{reporter:"spec", require:__dirname +"/qunit-mocha-ui", ui:"qunit-mocha-ui"},
-        src:["test/qunit-test.js", "test/qunit-expect-test.js", "test/suite-test.js"]
+        src:["test/test-helper.js", "test/qunit-test.js", "test/qunit-expect-test.js", "test/qunit-async-test.js", "test/suite-test.js"]
       }
     }
   });
