@@ -1,7 +1,7 @@
 {
   "name": "qunit-mocha-ui",
   "description": "A QUnit Interface for Mocha that supports all QUnit's assertion types.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Ian Taylor <ian.b.taylor@gmail.com>",
   "repository": {
     "type": "git",
