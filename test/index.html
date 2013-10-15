@@ -1,0 +1,17 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Mocha Tests</title>
+	<link rel="stylesheet" href="lib/mocha.css" />
+</head>
+<body>
+	<div id="mocha"></div>
+	<script src="lib/mocha.js"></script>
+	<script src="../lib/mocha-qunit-ui.js"></script>
+	<script>mocha.setup('qunit')</script>
+	<script src="qunit/test/test.js"></script>
+	<script>
+		mocha.run();
+	</script>
+</body>
+</html>
