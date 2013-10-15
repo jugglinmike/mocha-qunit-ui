@@ -54,7 +54,7 @@ var ui = function(suite) {
   var assertionCount = 0;
   var inModule = false;
   var expectedAssertions;
-  var deferrals;
+  var deferrals = 0;
   var currentDoneFn;
   var checkingDeferrals;
 
@@ -172,16 +172,13 @@ var ui = function(suite) {
 
     function addTest(title, expect, test) {
       suites[0].addTest(new Test(title, wrapTestFunction(test, function(test, done) {
-        deferrals = 0;
-        checkingDeferrals = false;
         expectedAssertions = expect;
-        assertionCount = 0;
-        currentDoneFn = function() {
-          done(checkAssertionCount());
-          currentDoneFn = null;
-        };
+        if (!inModule) {
+          assertionCount = 0;
+        }
+        currentDoneFn = done;
         context.stop();
-        test.call(this, currentDoneFn);
+        test.call(this);
         context.start();
       })));
     }
