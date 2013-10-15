@@ -57,39 +57,13 @@ var ui = function(suite){
   var currentDoneFn;
   var checkingDeferrals;
 
-  suite.on('pre-require', function(context){
+  suite.on('pre-require', function(realContext){
 
     /**
      * Execute before running tests.
      */
-
-    context.before = function(fn){
-      suites[0].beforeAll(fn);
-    };
-
-    /**
-     * Execute after running tests.
-     */
-
-    context.after = function(fn){
-      suites[0].afterAll(fn);
-    };
-
-    /**
-     * Execute before each test case.
-     */
-
-    context.beforeEach = function(fn){
-      suites[0].beforeEach(fn);
-    };
-
-    /**
-     * Execute after each test case.
-     */
-
-    context.afterEach = function(fn){
-      suites[0].afterEach(fn);
-    };
+    var context = {};
+    var assert = {};
 
     /**
      * Describe a "suite" with the given `title`.
@@ -123,9 +97,9 @@ var ui = function(suite){
     /** Define all of the QUnit Assertions based of their node.js equivalents */
     ["deepEqual", "equal", "notDeepEqual", "notEqual",
       "notStrictEqual","ok","strictEqual","throws"].forEach(function (k){
-      context[k] = function (){
+      assert[k] = function (){
         assertionCount++;
-        assert[k].apply(null, arguments);
+        assertFns[k].apply(null, arguments);
       }
     });
 
@@ -218,6 +192,14 @@ var ui = function(suite){
       }));
     });
 
+    context.assert = assert;
+    realContext.QUnit = context;
+    Object.keys(assert).forEach(function(attr) {
+      context[attr] = assert[attr];
+    });
+    Object.keys(context).forEach(function(attr) {
+      realContext[attr] = context[attr];
+    });
   });
 };
 
