@@ -25,9 +25,9 @@ var assertFns = {
 
 /**
  * QUnit-style interface:
- * 
- *     suite('Array');
- *     
+ *
+ *     module('Array');
+ *
  *     test('#length', function(){
  *       var arr = [1,2,3];
  *       ok(arr.length == 3);
@@ -51,7 +51,8 @@ var assertFns = {
 var ui = function(suite){
   var suites = [suite];
 
-  var assertionCount;
+  var assertionCount = 0;
+  var inModule = false;
   var expectedAssertions;
   var deferrals;
   var currentDoneFn;
@@ -68,17 +69,26 @@ var ui = function(suite){
     /**
      * Describe a "suite" with the given `title`.
      */
-  
-    context.suite = function(title, opts){
+
+    context.module = function(title, opts){
       if (suites.length > 1) suites.shift();
       var suite = Suite.create(suites[0], title);
       suites.unshift(suite);
 
+      suite.beforeEach(function() {
+        checkingDeferrals = false;
+        deferrals = 0;
+        inModule = true;
+        assertionCount = 0;
+      });
       if (opts) {
         suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
         if (opts.setup) suite.beforeEach(opts.setup.bind(this, assert));
         if (opts.teardown) suite.afterEach(opts.teardown.bind(this, assert));
       }
+      suite.afterEach(function(done) {
+        done(checkAssertionCount());
+      });
     };
 
     /** 
