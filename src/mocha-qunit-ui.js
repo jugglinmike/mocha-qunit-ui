@@ -1,18 +1,15 @@
-
-/**
- * Module dependencies.
- */
-
+(function(global, undefined) {
+"use strict";
 
 var Mocha;
-if(module.parent){
+if(typeof module !== 'undefined' && module.parent){
   Mocha = module.parent.require("mocha");
 }else{
-  Mocha = window.Mocha;
+  Mocha = global.Mocha;
 }
 var Suite = Mocha.Suite
   , Test = Mocha.Test
-  , assert = require("assert");
+  , assert = {};
 
 /**
  * QUnit-style interface:
@@ -39,7 +36,7 @@ var Suite = Mocha.Suite
  * 
  */
 
-module.exports = function(suite){
+var ui = function(suite){
   var suites = [suite];
 
   var assertionCount;
@@ -138,12 +135,12 @@ module.exports = function(suite){
       deferrals--;
       if (deferrals === 0 && !checkingDeferrals) {
         checkingDeferrals = true;
-        process.nextTick(function() {
+        setTimeout(function() {
           checkingDeferrals = false;
           if (deferrals === 0 && currentDoneFn) {
             currentDoneFn();
           }
-        });
+        }, 0);
       } else if (deferrals < 0) {
         throw new Error("cannot call start() when not stopped");
       }
@@ -212,4 +209,8 @@ module.exports = function(suite){
   });
 };
 
-Mocha.interfaces["qunit-mocha-ui"] = module.exports;
+Mocha.interfaces.qunit = ui;
+if (typeof module !== "undefined") {
+  module.exports = ui;
+}
+}(this));
