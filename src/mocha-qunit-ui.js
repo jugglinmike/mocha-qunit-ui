@@ -76,8 +76,8 @@ var ui = function(suite){
 
       if (opts) {
         suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
-        if (opts.setup) suite.beforeEach(opts.setup);
-        if (opts.teardown) suite.afterEach(opts.teardown);
+        if (opts.setup) suite.beforeEach(opts.setup.bind(this, assert));
+        if (opts.teardown) suite.afterEach(opts.teardown.bind(this, assert));
       }
     };
 
@@ -177,18 +177,13 @@ var ui = function(suite){
      * callback `test` acting as a thunk.
      */
     context.test = normalizeTestArgs(function(title, expect, test) {
-      if (test.length) {
-        // it takes an argument, assumed to be the done function, so it's really an async test
-        context.asyncTest(title, expect, test);
-      } else {
-        addTest(title, expect, test);
-      }
+      addTest(title, expect, test.bind(this, assert));
     });
 
     context.asyncTest = normalizeTestArgs(function(title, expect, test) {
       addTest(title, expect, wrapTestFunction(test, function(test, done) {
         context.stop();
-        test.call(this, done);
+        test.call(this, assert);
       }));
     });
 
