@@ -1,3 +1,6 @@
+(function(global, undefined) {
+"use strict";
+
 var Mocha = global.Mocha;
 var Suite = Mocha.Suite;
 var Test = Mocha.Test;
@@ -228,3 +231,4 @@ Mocha.interfaces.qunit = ui;
 if (typeof module !== "undefined") {
   module.exports = ui;
 }
+}(this));
