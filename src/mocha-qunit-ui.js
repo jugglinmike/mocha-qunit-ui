@@ -83,8 +83,22 @@ var ui = function(suite) {
       });
       if (opts) {
         suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
-        if (opts.setup) suite.beforeEach(opts.setup.bind(this, assert));
-        if (opts.teardown) suite.afterEach(opts.teardown.bind(this, assert));
+        if (opts.setup) {
+          suite.beforeEach(function(done) {
+            stop();
+            currentDoneFn = done;
+            opts.setup(assert);
+            start();
+          });
+        }
+        if (opts.teardown) {
+          suite.afterEach(function(done) {
+            stop();
+            currentDoneFn = done;
+            opts.teardown(assert);
+            start();
+          });
+        }
       }
       suite.afterEach(function(done) {
         done(checkAssertionCount());
