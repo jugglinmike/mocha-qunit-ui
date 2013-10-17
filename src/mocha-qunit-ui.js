@@ -3,6 +3,7 @@ var Suite = Mocha.Suite;
 var Test = Mocha.Test;
 var QUnit = global.QUnit;
 var assert = QUnit.assert;
+var config = QUnit.config;
 
 var ui = function(suite) {
   var suites = [suite];
@@ -14,7 +15,7 @@ var ui = function(suite) {
   var checkingDeferrals;
 
   function setContext(context) {
-    QUnit.config.current = {
+    config.current = {
       testEnvironment: context,
       assertions: []
     };
@@ -27,7 +28,7 @@ var ui = function(suite) {
   // one failure per test, so report the first failure.
   function checkAssertions() {
     try {
-      QUnit.config.current.assertions.forEach(function(assertion) {
+      config.current.assertions.forEach(function(assertion) {
         if (!assertion.result) {
           throw new Error(assertion.message);
         }
@@ -97,7 +98,7 @@ var ui = function(suite) {
     * Returns an Error object if it did, null otherwise;
     */
     var checkAssertionCount = function() {
-      var actualCount = QUnit.config.current.assertions.length;
+      var actualCount = config.current.assertions.length;
       if(expectedAssertions > 0 && expectedAssertions != actualCount) {
         return new Error("Expected "+ expectedAssertions +
           " assertions but saw " + actualCount);
