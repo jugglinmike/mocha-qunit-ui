@@ -1,1 +1,2 @@
+QUnit.config.autostart = false;
 }).call(qWin);

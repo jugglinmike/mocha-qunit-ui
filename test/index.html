@@ -7,12 +7,13 @@
 <body>
 	<div id="mocha"></div>
 	<script src="lib/mocha.js"></script>
+	<div id="qunit-fixture">test markup</div>
 	<script src="../mocha-qunit-ui.js"></script>
 	<script>mocha.setup('qunit')</script>
 	<script src="qunit/test/test.js"></script>
-	<div id="qunit-fixture"></div>
-	<div id="qunit" style="display: none;"></div>
 	<script>
+		mocha.grep(/jsDump output|displayed|timing/i);
+		mocha.invert();
 		mocha.run();
 	</script>
 </body>
