@@ -58,8 +58,6 @@ var ui = function(suite) {
     };
   });
 
-  var push = QUnit.push;
-  var ok = assert.ok;
   var spy = function(obj, name, fn) {
     var orig = obj[name];
     if (orig.reset) {
