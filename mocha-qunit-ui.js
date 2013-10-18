@@ -2228,6 +2228,7 @@ var ui = function(suite) {
   var suites = [suite];
 
   var inModule = false;
+  var firstTest = true;
   var expectedAssertions;
   var deferrals = 0;
   var currentDoneFn;
@@ -2257,6 +2258,62 @@ var ui = function(suite) {
     }
   }
 
+  var secret = {};
+  var logCallbacks = {};
+  var logFnNames = [
+    "begin", "done", "moduleStart", "moduleDone", "testStart", "testDone",
+    "log"
+  ];
+  var log = function(name, context) {
+    logCallbacks[name].forEach(function(callback) {
+      callback(context);
+    });
+  };
+  logFnNames.forEach(function(fnName) {
+    var callbacks = logCallbacks[fnName] = [];
+    QUnit[fnName] = function(callback) {
+      if (typeof callback !== "function") { return; }
+      callbacks.push(callback);
+    };
+  });
+
+  var push = QUnit.push;
+  var ok = assert.ok;
+  var spy = function(obj, name, fn) {
+    var orig = obj[name];
+    if (orig.reset) {
+      orig = orig.reset();
+    }
+    var spied = obj[name] = function() {
+      fn.apply(this, arguments);
+      return orig.apply(this, arguments);
+    };
+    spied.reset = function() {
+      obj[name] = orig;
+      return orig;
+    };
+  };
+  var setLog = function(logDetails) {
+    spy(QUnit, "push", function(result, actual, expected, message) {
+      log("log", {
+        name: logDetails.name,
+        module: logDetails.module,
+        result: result,
+        message: message,
+        actual: actual,
+        expected: expected
+      });
+    });
+    spy(assert, "ok", function(result, message) {
+      log("log", {
+        name: logDetails.name,
+        module: logDetails.module,
+        result: result,
+        message: message
+      });
+    });
+  };
+
   suite.on('pre-require', function(context) {
 
     /**
@@ -2268,6 +2325,24 @@ var ui = function(suite) {
       var suite = Suite.create(suites[0], title);
       suites.unshift(suite);
       var originalFixture = document.getElementById("qunit-fixture").innerHTML;
+      var assertionCounts = {
+        total: 0,
+        passed: 0,
+        failed: 0
+      };
+
+      suite.beforeAll(function() {
+        log("moduleStart", { name: title });
+      });
+
+      suite.afterAll(function() {
+        log("moduleDone", {
+          name: title,
+          total: assertionCounts.total,
+          passed: assertionCounts.passed,
+          failed: assertionCounts.failed
+        });
+      });
 
       suite.beforeEach(function() {
         checkingDeferrals = false;
@@ -2275,6 +2350,11 @@ var ui = function(suite) {
         deferrals = 0;
         inModule = true;
         setContext(this);
+
+        var logData = { name: this.currentTest.title, module: title };
+        setLog(logData);
+
+        log("testStart", logData);
       });
 
       if (opts) {
@@ -2297,6 +2377,24 @@ var ui = function(suite) {
         }
       }
       suite.afterEach(function(done) {
+        config.current.assertions.forEach(function(assertion) {
+          var state = test.state;
+          assertionCounts.total++;
+          if (assertion.result) {
+            assertionCounts.passed++;
+          } else {
+            assertionCounts.failed++;
+          }
+        });
+
+        log("testDone", {
+          module: title,
+          total: assertionCounts.total,
+          passed: assertionCounts.passed,
+          failed: assertionCounts.failed,
+          name: this.currentTest.title,
+          duration: this.currentTest.duration
+        });
         done(checkAssertionCount());
       });
     };
@@ -2370,6 +2468,10 @@ var ui = function(suite) {
         expectedAssertions = expect;
         currentDoneFn = done;
         context.stop();
+        if (firstTest) {
+          log("begin");
+          firstTest = false;
+        }
         if (!inModule) {
           setContext(this);
         }
