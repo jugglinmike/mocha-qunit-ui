@@ -2283,14 +2283,20 @@ var ui = function(suite) {
       orig = orig.reset();
     }
     var spied = obj[name] = function() {
+      var res = orig.apply(this, arguments);
       fn.apply(this, arguments);
-      return orig.apply(this, arguments);
+      return res;
     };
     spied.reset = function() {
       obj[name] = orig;
       return orig;
     };
   };
+  QUnit.log(function(details) {
+    var assertions = config.current.assertions;
+    var last = assertions[assertions.length - 1];
+    last.message = details.message;
+  });
   var setLog = function(logDetails) {
     spy(QUnit, "push", function(result, actual, expected, message) {
       log("log", {
