@@ -26,16 +26,17 @@ var ui = function(suite) {
   // Ensure that all the assertions declared in the current context have
   // passed. This behavior differs somewhat from Mocha because (like QUnit)
   // more than one assertion may fail in a given test. Mocha can only report
-  // one failure per test, so report the first failure.
+  // one failure per test, so generate a single JavaScript Error object by
+  // concatenating the messages from each QUnit error.
   function checkAssertions() {
-    try {
-      config.current.assertions.forEach(function(assertion) {
-        if (!assertion.result) {
-          throw new Error(assertion.message);
-        }
-      });
-    } catch(err) {
-      return err;
+    var msgs = [];
+    config.current.assertions.forEach(function(assertion) {
+      if (!assertion.result) {
+        msgs.push(assertion.message);
+      }
+    });
+    if (msgs.length) {
+      return new Error(msgs);
     }
   }
 
