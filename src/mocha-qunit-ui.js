@@ -1,4 +1,5 @@
-var Mocha = global.Mocha;
+var isBrowser = 'document' in global;
+var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
 var Test = Mocha.Test;
 var QUnit = global.QUnit;
@@ -178,11 +179,14 @@ var ui = function(suite) {
      * Describe a "suite" with the given `title`.
      */
 
-    context.module = function(title, opts) {
+    context.module = QUnit.module = function(title, opts) {
       if (suites.length > 1) suites.shift();
       var suite = Suite.create(suites[0], title);
+      var originalFixture;
       suites.unshift(suite);
-      var originalFixture = document.getElementById("qunit-fixture").innerHTML;
+      if (isBrowser) {
+        originalFixture = document.getElementById("qunit-fixture").innerHTML;
+      }
       var assertionCounts = {
         total: 0,
         passed: 0,
@@ -204,7 +208,9 @@ var ui = function(suite) {
 
       suite.beforeEach(function() {
         checkingDeferrals = false;
-        document.getElementById("qunit-fixture").innerHTML = originalFixture;
+        if (isBrowser) {
+          document.getElementById("qunit-fixture").innerHTML = originalFixture;
+        }
         deferrals = 0;
         inModule = true;
         setContext(this);

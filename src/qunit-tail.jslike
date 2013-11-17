@@ -1,2 +1,11 @@
+// Ensure that QUnit does not start up automatically (to mimick Mocha's default
+// behavior).
 QUnit.config.autostart = false;
-}).call(qWin);
+
+// Restoring the global object to its previous state
+if (_addEventListener.wasDefined) {
+  global.addEventListener = _addEventListener.original;
+} else {
+  delete global.addEventListener;
+}
+}());
