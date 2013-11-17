@@ -1,6 +1,18 @@
 (function() {
-var qWin = {};
 (function() {
+// Shadow the global exports so that QUnit does not attempt to define itself
+// via CommonJS in such environments.
+var exports;
+
+// Temporarily define the required DOM API
+var _addEventListener = {
+  original: global.addEventListener,
+  wasDefined: 'addEventListener' in global
+};
+
+if (typeof global.addEventListener !== 'function') {
+  global.addEventListener = function() {};
+}
 /**
  * QUnit v1.13.0pre - A JavaScript Unit Testing Framework
  *
@@ -2213,11 +2225,21 @@ if ( typeof exports !== "undefined" ) {
 
 // get at whatever the global object is, like window in browsers
 }( (function() {return this;}.call()) ));
+// Ensure that QUnit does not start up automatically (to mimick Mocha's default
+// behavior).
 QUnit.config.autostart = false;
-}).call(qWin);
+
+// Restoring the global object to its previous state
+if (_addEventListener.wasDefined) {
+  global.addEventListener = _addEventListener.original;
+} else {
+  delete global.addEventListener;
+}
+}());
 (function(global, undefined) {
 "use strict";
-var Mocha = global.Mocha;
+var isBrowser = 'document' in global;
+var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
 var Test = Mocha.Test;
 var QUnit = global.QUnit;
@@ -2397,11 +2419,14 @@ var ui = function(suite) {
      * Describe a "suite" with the given `title`.
      */
 
-    context.module = function(title, opts) {
+    context.module = QUnit.module = function(title, opts) {
       if (suites.length > 1) suites.shift();
       var suite = Suite.create(suites[0], title);
+      var originalFixture;
       suites.unshift(suite);
-      var originalFixture = document.getElementById("qunit-fixture").innerHTML;
+      if (isBrowser) {
+        originalFixture = document.getElementById("qunit-fixture").innerHTML;
+      }
       var assertionCounts = {
         total: 0,
         passed: 0,
@@ -2423,7 +2448,9 @@ var ui = function(suite) {
 
       suite.beforeEach(function() {
         checkingDeferrals = false;
-        document.getElementById("qunit-fixture").innerHTML = originalFixture;
+        if (isBrowser) {
+          document.getElementById("qunit-fixture").innerHTML = originalFixture;
+        }
         deferrals = 0;
         inModule = true;
         setContext(this);

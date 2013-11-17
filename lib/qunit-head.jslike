@@ -1,2 +1,14 @@
-var qWin = {};
 (function() {
+// Shadow the global exports so that QUnit does not attempt to define itself
+// via CommonJS in such environments.
+var exports;
+
+// Temporarily define the required DOM API
+var _addEventListener = {
+  original: global.addEventListener,
+  wasDefined: 'addEventListener' in global
+};
+
+if (typeof global.addEventListener !== 'function') {
+  global.addEventListener = function() {};
+}
