@@ -59,6 +59,35 @@ var ui = function(suite) {
     };
   });
 
+  var assertMessages = {
+    deepEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to deeply equal ' + expected;
+    }
+  };
+  for (var key in assertMessages) {
+    if (assertMessages.hasOwnProperty(key)) {
+      (function(key, orig) {
+        assert[key] = function(a, b, message) {
+          var assertions = config.current.assertions;
+          var latest;
+          orig.apply(this, arguments);
+          latest = assertions[assertions.length - 1];
+
+          latest.message = message || '';
+          if (message) {
+            latest.message += ': ';
+          }
+          latest.message += assertMessages[key](
+            QUnit.jsDump.parse(a),
+            QUnit.jsDump.parse(b)
+          );
+        };
+      }(key, assert[key]));
+    }
+  }
+
+  var push = QUnit.push;
+  var ok = assert.ok;
   var spy = function(obj, name, fn) {
     var orig = obj[name];
     if (orig.reset) {
@@ -98,7 +127,7 @@ var ui = function(suite) {
     });
     spy(assert, "ok", function(result, message) {
       if (message === undefined) {
-        message = "Expected " + QUnit.jsDump.parse(result) + " to be ok";
+        message = "expected " + QUnit.jsDump.parse(result) + " to be ok";
       }
       config.current.assertions.push({
         result: result,
