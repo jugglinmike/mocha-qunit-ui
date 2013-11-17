@@ -2411,6 +2411,7 @@ var ui = function(suite) {
         message: message
       });
     });
+    global.ok = assert.ok;
   };
 
   suite.on('pre-require', function(context) {
