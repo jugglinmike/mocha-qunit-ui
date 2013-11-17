@@ -2237,7 +2237,11 @@ var ui = function(suite) {
   function setContext(context) {
     config.current = {
       testEnvironment: context,
-      assertions: []
+      // QUnit appends to this array when an assertion runs
+      assertions: [],
+      // The QUnit Mocha UI maintains a separate assertion array in order to
+      // log assertion results with HTML-free messages
+      _assertions: []
     };
     QUnit.current_testEnvironment = context;
   }
@@ -2249,7 +2253,7 @@ var ui = function(suite) {
   // concatenating the messages from each QUnit error.
   function checkAssertions() {
     var msgs = [];
-    config.current.assertions.forEach(function(assertion) {
+    config.current._assertions.forEach(function(assertion) {
       if (!assertion.result) {
         msgs.push(assertion.message);
       }
@@ -2279,15 +2283,36 @@ var ui = function(suite) {
   });
 
   var assertMessages = {
+    equal: function(actual, expected) {
+      return 'expected ' + actual + ' to equal ' + expected;
+    },
+    notEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to not equal ' + expected;
+    },
+    propEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to prop equal ' + expected;
+    },
+    notPropEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to not prop equal ' + expected;
+    },
+    strictEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to strictly equal ' + expected;
+    },
+    notStrictEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to not strictly equal ' + expected;
+    },
     deepEqual: function(actual, expected) {
       return 'expected ' + actual + ' to deeply equal ' + expected;
+    },
+    notDeepEqual: function(actual, expected) {
+      return 'expected ' + actual + ' to not deeply equal ' + expected;
     }
   };
   for (var key in assertMessages) {
     if (assertMessages.hasOwnProperty(key)) {
       (function(key, orig) {
-        assert[key] = function(a, b, message) {
-          var assertions = config.current.assertions;
+        assert[key] = global[key] = function(a, b, message) {
+          var assertions = config.current._assertions;
           var latest;
           orig.apply(this, arguments);
           latest = assertions[assertions.length - 1];
@@ -2315,7 +2340,7 @@ var ui = function(suite) {
     var spied = obj[name] = function() {
       var res = orig.apply(this, arguments);
       fn.apply(this, arguments);
-      return;// orig.apply(this, arguments);
+      return orig.apply(this, arguments);
     };
     spied.reset = function() {
       obj[name] = orig;
@@ -2329,7 +2354,7 @@ var ui = function(suite) {
   });
   var setLog = function(logDetails) {
     spy(QUnit, "push", function(result, actual, expected, message) {
-      config.current.assertions.push({
+      config.current._assertions.push({
         result: result,
         actual: actual,
         expected: expected,
@@ -2345,10 +2370,13 @@ var ui = function(suite) {
       });
     });
     spy(assert, "ok", function(result, message) {
+      // TODO: Extend facility for assertion message overriding to allow
+      // argument type specification and move this logic there.
       if (message === undefined) {
         message = "expected " + QUnit.jsDump.parse(result) + " to be ok";
       }
-      config.current.assertions.push({
+
+      config.current._assertions.push({
         result: result,
         actual: result,
         expected: true,
@@ -2426,7 +2454,7 @@ var ui = function(suite) {
         }
       }
       suite.afterEach(function(done) {
-        config.current.assertions.forEach(function(assertion) {
+        config.current._assertions.forEach(function(assertion) {
           var state = test.state;
           assertionCounts.total++;
           if (assertion.result) {
@@ -2464,7 +2492,7 @@ var ui = function(suite) {
     * Returns an Error object if it did, null otherwise;
     */
     var checkAssertionCount = function() {
-      var actualCount = config.current.assertions.length;
+      var actualCount = config.current._assertions.length;
       if(expectedAssertions > 0 && expectedAssertions != actualCount) {
         return new Error("Expected "+ expectedAssertions +
           " assertions but saw " + actualCount);
