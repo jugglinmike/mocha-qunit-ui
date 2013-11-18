@@ -2570,6 +2570,11 @@ var ui = function(suite) {
 
     function addTest(title, expect, test) {
       suites[0].addTest(new Test(title, wrapTestFunction(test, function(test, done) {
+
+        // QUnit tests never timeout, unless `QUnit.config.testTimeout` is
+        // specified. Mocha allows tests with a 0 timeout value to run
+        // indefinitely.
+        this.timeout(config.testTimeout || 0);
         expectedAssertions = expect;
         currentDoneFn = done;
         context.stop();
