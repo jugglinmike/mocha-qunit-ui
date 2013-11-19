@@ -12,15 +12,7 @@ node_modules:
 
 .PHONY: expected-failures
 expected-failures: node_modules
-	@F=0; \
-	for f in test/expected-failures/*.js; do \
-		node ./test/assert-failures.js $$f; \
-		if [ "$$?" -ne 0 ]; then \
-			echo "False positive reported by test file '$$f'"; \
-			F=1; \
-		fi \
-	done; \
-	exit $$F
+	@./node_modules/.bin/mocha --ui tdd test/expected-failures.js
 
 .PHONY: test
 test: expected-failures
