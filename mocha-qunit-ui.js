@@ -14,7 +14,7 @@ if (typeof global.addEventListener !== 'function') {
   global.addEventListener = function() {};
 }
 /**
- * QUnit v1.13.0pre - A JavaScript Unit Testing Framework
+ * QUnit v1.12.0 - A JavaScript Unit Testing Framework
  *
  * http://qunitjs.com
  *
@@ -1151,7 +1151,7 @@ QUnit.load = function() {
 
 		addEvent( filter, "click", function() {
 			var tmp,
-				ol = id( "qunit-tests" );
+				ol = document.getElementById( "qunit-tests" );
 
 			if ( filter.checked ) {
 				ol.className = ol.className + " hidepass";
@@ -1171,7 +1171,7 @@ QUnit.load = function() {
 		if ( config.hidepassed || defined.sessionStorage && sessionStorage.getItem( "qunit-filter-passed-tests" ) ) {
 			filter.checked = true;
 			// `ol` initialized at top of scope
-			ol = id( "qunit-tests" );
+			ol = document.getElementById( "qunit-tests" );
 			ol.className = ol.className + " hidepass";
 		}
 		toolbar.appendChild( filter );
