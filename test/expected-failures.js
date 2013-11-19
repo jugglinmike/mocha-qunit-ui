@@ -7,6 +7,9 @@ var testRegex = /\b(asyncTest|test)\b\s*\(/g;
 suite('expected failures', function() {
 
   var testFiles = fs.readdirSync(__dirname + '/expected-failures')
+    .filter(function(fileName) {
+      return /\.js$/i.test(fileName);
+    })
     .map(function(fileName) {
       return {
         prettyName: fileName
