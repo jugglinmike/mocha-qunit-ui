@@ -75,11 +75,12 @@ example `Gruntfile.js`:
     module.exports = function(grunt) {
       grunt.loadNpmTasks('grunt-mocha');
       grunt.initConfig({
-        mochaTest: {
+        mocha: {
           test:{
             options:{
-              require: 'qunit-mocha-ui',
-              ui: 'qunit-mocha-ui'
+              mocha: {
+                ui: 'qunit'
+              }
             },
             src: [
               "test/test-file-1.js"
@@ -87,13 +88,13 @@ example `Gruntfile.js`:
           }
         }
       });
-      grunt.registerTask('default', ['mochaTest']);
+      grunt.registerTask('default', ['mocha']);
     };
 
 ## Known differences from QUnit API
 
-* `module` is not defined globally in Node.js. If you want to define a QUnit
-  module in that environment, use the `QUnit.module` alias.
+* The global variable `module` is reserved in Node.js. If you want to define a
+  QUnit module in that environment, use the `QUnit.module` alias.
 
 ## Running tests
 
