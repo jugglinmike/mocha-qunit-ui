@@ -1,29 +1,28 @@
 {
-  "name": "qunit-mocha-ui",
-  "description": "A QUnit Interface for Mocha that supports all QUnit's assertion types.",
-  "version": "0.0.4",
-  "author": "Ian Taylor <ian.b.taylor@gmail.com>",
+  "name": "mocha-qunit-ui",
+  "description": "An interface for Mocha that implements QUnit's API.",
+  "version": "0.0.1",
+  "author": "Mike Pennisi <mike@mikepennisi.com>",
   "repository": {
     "type": "git",
-    "url": "http://github.com/itaylor/qunit-mocha-ui"
+    "url": "http://github.com/jugglinmike/mocha-qunit-ui"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-mocha-test": ">=0.6.1",
-    "grunt-browserify": "~1.2.0",
     "mocha": "~1.14.0"
   },
   "peerDependencies": {
     "mocha": "~1.14.0"
   },
-  "main": "qunit-mocha-ui.js",
+  "main": "mocha-qunit-ui.js",
   "scripts": {
-    "test": "grunt"
+    "test": "make test"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "http: //www.opensource.org/licenses/mit-license.php"
+      "url": "http://www.opensource.org/licenses/mit-license.php"
     }
   ]
 }
