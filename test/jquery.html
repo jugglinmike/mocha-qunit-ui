@@ -3,6 +3,7 @@
 	<meta charset="utf-8">
 	<title>Mocha Tests</title>
 	<link rel="stylesheet" href="lib/mocha.css" />
+  <script src="lib/es5-shim.js"></script>
 </head>
 <body>
 	<div id="mocha"></div>
@@ -16,7 +17,9 @@
 	<script>
 		mocha.grep(/jsDump output|displayed|timing/i);
 		mocha.invert();
-		mocha.run();
+		if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+			mocha.run();
+		}
 	</script>
 </body>
 </html>
