@@ -1,4 +1,5 @@
 (function() {
+
 (function() {
 // Shadow the global exports so that QUnit does not attempt to define itself
 // via CommonJS in such environments.
@@ -13,6 +14,7 @@ var _addEventListener = {
 if (typeof global.addEventListener !== 'function') {
   global.addEventListener = function() {};
 }
+
 /**
  * QUnit v1.12.0 - A JavaScript Unit Testing Framework
  *
@@ -2225,6 +2227,7 @@ if ( typeof exports !== "undefined" ) {
 
 // get at whatever the global object is, like window in browsers
 }( (function() {return this;}.call()) ));
+
 // Ensure that QUnit does not start up automatically (to mimick Mocha's default
 // behavior).
 QUnit.config.autostart = false;
@@ -2236,8 +2239,10 @@ if (_addEventListener.wasDefined) {
   delete global.addEventListener;
 }
 }());
+
 (function(global, undefined) {
 "use strict";
+
 var isBrowser = 'document' in global;
 var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
@@ -2616,5 +2621,7 @@ Mocha.interfaces.qunit = ui;
 if (typeof module !== "undefined") {
   module.exports = ui;
 }
+
 }(this));
+
 }());

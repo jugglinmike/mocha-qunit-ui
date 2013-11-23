@@ -8,16 +8,14 @@
     "url": "http://github.com/jugglinmike/mocha-qunit-ui"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-mocha-test": ">=0.6.1",
-    "mocha": "~1.14.0"
-  },
-  "peerDependencies": {
-    "mocha": "~1.14.0"
+    "grunt": "~0.4.2",
+    "grunt-mocha": "~0.4.6",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-mocha-test": "~0.7.0"
   },
   "main": "mocha-qunit-ui.js",
   "scripts": {
-    "test": "make test"
+    "test": "grunt test"
   },
   "licenses": [
     {
