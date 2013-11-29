@@ -11,7 +11,8 @@
     "grunt": "~0.4.2",
     "grunt-mocha": "~0.4.6",
     "grunt-contrib-concat": "~0.3.0",
-    "grunt-mocha-test": "~0.7.0"
+    "grunt-mocha-test": "~0.8.0",
+    "mocha": "~1.14.0"
   },
   "main": "mocha-qunit-ui.js",
   "scripts": {

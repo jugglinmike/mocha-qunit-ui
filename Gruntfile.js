@@ -26,6 +26,9 @@ module.exports = function(grunt) {
     },
     mochaTest: {
       options: {
+        // Use this project's version of Mocha (not the version packaged with
+        // the `grunt-mocha-test` module)
+        mocha: require('mocha'),
         reporter: 'dot',
         ui: 'tdd'
       },
