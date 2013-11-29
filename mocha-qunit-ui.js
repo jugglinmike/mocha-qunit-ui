@@ -2243,6 +2243,49 @@ if (_addEventListener.wasDefined) {
 (function(global, undefined) {
 "use strict";
 
+var nativeForEach = Array.prototype.forEach;
+var oKeys = Object.keys || function(obj) {
+  if (obj !== Object(obj)) throw new TypeError('Invalid object');
+  var keys = [];
+  for (var key in obj) if (Object.hasOwnProperty.call(obj, key)) {
+    keys.push(key);
+  }
+  return keys;
+};
+var forEach = function(obj, iterator, context) {
+  if (obj == null) return;
+  if (nativeForEach && obj.forEach === nativeForEach) {
+    obj.forEach(iterator, context);
+  } else if (obj.length === +obj.length) {
+    for (var i = 0, length = obj.length; i < length; i++) {
+      if (iterator.call(context, obj[i], i, obj) === breaker) return;
+    }
+  } else {
+    var keys = oKeys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      iterator.call(context, obj[keys[i]], keys[i], obj);
+    }
+  }
+};
+
+var nativeBind = Function.prototype.bind;
+var slice = Array.prototype.slice;
+var bind = function(func, context) {
+  var args, bound;
+  if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+  if (typeof func !== 'function') throw new TypeError;
+  args = slice.call(arguments, 2);
+  return bound = function() {
+    if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+    ctor.prototype = func.prototype;
+    var self = new ctor;
+    ctor.prototype = null;
+    var result = func.apply(self, args.concat(slice.call(arguments)));
+    if (Object(result) === result) return result;
+    return self;
+  };
+};
+
 var isBrowser = 'document' in global;
 var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
@@ -2280,7 +2323,7 @@ var ui = function(suite) {
   // concatenating the messages from each QUnit error.
   function checkAssertions() {
     var msgs = [];
-    config.current._assertions.forEach(function(assertion) {
+    forEach(config.current._assertions, function(assertion) {
       if (!assertion.result) {
         msgs.push(assertion.message);
       }
@@ -2297,11 +2340,11 @@ var ui = function(suite) {
     "log"
   ];
   var log = function(name, context) {
-    logCallbacks[name].forEach(function(callback) {
+    forEach(logCallbacks[name], function(callback) {
       callback.call(QUnit, context);
     });
   };
-  logFnNames.forEach(function(fnName) {
+  forEach(logFnNames, function(fnName) {
     var callbacks = logCallbacks[fnName] = [];
     QUnit[fnName] = function(callback) {
       if (typeof callback !== "function") { return; }
@@ -2487,7 +2530,7 @@ var ui = function(suite) {
         }
       }
       suite.afterEach(function(done) {
-        config.current._assertions.forEach(function(assertion) {
+        forEach(config.current._assertions, function(assertion) {
           var state = test.state;
           assertionCounts.total++;
           if (assertion.result) {
@@ -2569,7 +2612,7 @@ var ui = function(suite) {
       var result = function(done) {
         return wrapper.call(this, test, done);
       };
-      result.toString = test.toString.bind(test);
+      result.toString = bind(test.toString, test);
       return result;
     }
 

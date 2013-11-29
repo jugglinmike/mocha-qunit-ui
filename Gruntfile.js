@@ -11,6 +11,8 @@ module.exports = function(grunt) {
         'qunit/qunit/qunit.js',
         'src/qunit-tail.jslike',
         'src/ui-head.jslike',
+        'src/for-each.js',
+        'src/bind.js',
         'src/mocha-qunit-ui.js',
         'src/ui-tail.jslike',
         'src/tail.js'

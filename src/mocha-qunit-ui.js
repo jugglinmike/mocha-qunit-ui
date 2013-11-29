@@ -35,7 +35,7 @@ var ui = function(suite) {
   // concatenating the messages from each QUnit error.
   function checkAssertions() {
     var msgs = [];
-    config.current._assertions.forEach(function(assertion) {
+    forEach(config.current._assertions, function(assertion) {
       if (!assertion.result) {
         msgs.push(assertion.message);
       }
@@ -52,11 +52,11 @@ var ui = function(suite) {
     "log"
   ];
   var log = function(name, context) {
-    logCallbacks[name].forEach(function(callback) {
+    forEach(logCallbacks[name], function(callback) {
       callback.call(QUnit, context);
     });
   };
-  logFnNames.forEach(function(fnName) {
+  forEach(logFnNames, function(fnName) {
     var callbacks = logCallbacks[fnName] = [];
     QUnit[fnName] = function(callback) {
       if (typeof callback !== "function") { return; }
@@ -242,7 +242,7 @@ var ui = function(suite) {
         }
       }
       suite.afterEach(function(done) {
-        config.current._assertions.forEach(function(assertion) {
+        forEach(config.current._assertions, function(assertion) {
           var state = test.state;
           assertionCounts.total++;
           if (assertion.result) {
@@ -324,7 +324,7 @@ var ui = function(suite) {
       var result = function(done) {
         return wrapper.call(this, test, done);
       };
-      result.toString = test.toString.bind(test);
+      result.toString = bind(test.toString, test);
       return result;
     }
 
