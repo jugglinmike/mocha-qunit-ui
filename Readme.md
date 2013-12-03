@@ -24,72 +24,78 @@ From the command line:
 
 Programatically:
 
-    // Load mocha-qunit-ui
-    require("mocha-qunit-ui");
-    // Tell mocha to use the interface.
-    var mocha = new Mocha({
-      ui:"qunit"
-    });
-    // Add your test files
-    mocha.addFile("path/to/my/testfile.js");
-    // Run your tests
-    mocha.run(function(failures){
-      process.exit(failures);
-    });
+```JavaScript
+// Load mocha-qunit-ui
+require("mocha-qunit-ui");
+// Tell mocha to use the interface.
+var mocha = new Mocha({
+  ui:"qunit"
+});
+// Add your test files
+mocha.addFile("path/to/my/testfile.js");
+// Run your tests
+mocha.run(function(failures){
+  process.exit(failures);
+});
+```
 
 ### Browser environments
 
 Declare an HTML file with the following markup to run tests in the browser:
 
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Tests</title>
-        <script src="path/to/mocha.js"></script>
-        <script src="mocha-qunit-ui.js"></script>
-        <script>
-          mocha.setup({
-            ui: "qunit"
-          });
-        </script>
-        <link rel="stylesheet" type="text/css" href="path/to/mocha.css">
-      </head>
-      <body>
-        <div id="mocha"></div>
-        <script>
-          suite("On page test!");
-          test("An awesome QUnit style test", 2, function () {
-            ok(true);
-            equal(1, parseInt("1"));
-          });
-          mocha.run();
-        </script>
-      </body>
-    </html>
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tests</title>
+    <script src="path/to/mocha.js"></script>
+    <script src="mocha-qunit-ui.js"></script>
+    <script>
+      mocha.setup({
+        ui: "qunit"
+      });
+    </script>
+    <link rel="stylesheet" type="text/css" href="path/to/mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script>
+      suite("On page test!");
+      test("An awesome QUnit style test", 2, function () {
+        ok(true);
+        equal(1, parseInt("1"));
+      });
+      mocha.run();
+    </script>
+  </body>
+</html>
+```
 
 You can also use qunit-mocha-ui from [Grunt](http://gruntjs.com/) with [the
 `grunt-mocha` task](https://github.com/kmiyashiro/grunt-mocha). Here's an
 example `Gruntfile.js`:
 
-    module.exports = function(grunt) {
-      grunt.loadNpmTasks('grunt-mocha');
-      grunt.initConfig({
-        mocha: {
-          test:{
-            options:{
-              mocha: {
-                ui: 'qunit'
-              }
-            },
-            src: [
-              "test/test-file-1.js"
-            ]
+```JavaScript
+module.exports = function(grunt) {
+  grunt.loadNpmTasks('grunt-mocha');
+  grunt.initConfig({
+    mocha: {
+      test:{
+        options:{
+          mocha: {
+            ui: 'qunit'
           }
-        }
-      });
-      grunt.registerTask('default', ['mocha']);
-    };
+        },
+        src: [
+          "test/test-file-1.js"
+        ]
+      }
+    }
+  });
+  grunt.registerTask('default', ['mocha']);
+};
+```
 
 ## Known differences from QUnit API
 
