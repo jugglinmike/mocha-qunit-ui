@@ -61,7 +61,7 @@ Declare an HTML file with the following markup to run tests in the browser:
   <body>
     <div id="mocha"></div>
     <script>
-      suite("On page test!");
+      module("On page test!");
       test("An awesome QUnit style test", 2, function () {
         ok(true);
         equal(1, parseInt("1"));
