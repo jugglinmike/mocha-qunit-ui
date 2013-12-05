@@ -23,7 +23,7 @@ module.exports = function(grunt) {
         options: {
           run: true
         },
-        src: ['test/jquery.html']
+        src: ['test/qunit.html']
       }
     },
     mochaTest: {
