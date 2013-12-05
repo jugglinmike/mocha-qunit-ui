@@ -1,0 +1,21 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Mocha Tests</title>
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+</head>
+<body>
+	<div id="mocha"></div>
+	<script src="../node_modules/mocha/mocha.js"></script>
+	<script src="../mocha-qunit-ui.js"></script>
+	<script>mocha.setup('qunit')</script>
+	<script>
+		test('functions in an HTML document with no `#qunit-fixture` element', function() {
+			ok(true);
+		});
+		if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+			mocha.run();
+		}
+	</script>
+</body>
+</html>

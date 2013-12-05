@@ -2471,10 +2471,15 @@ var ui = function(suite) {
     context.module = QUnit.module = function(title, opts) {
       if (suites.length > 1) suites.shift();
       var suite = Suite.create(suites[0], title);
-      var originalFixture;
+      var fixture, fixtureMarkup;
+
       suites.unshift(suite);
+
       if (isBrowser) {
-        originalFixture = document.getElementById("qunit-fixture").innerHTML;
+        fixture = document.getElementById("qunit-fixture");
+        if (fixture) {
+          fixtureMarkup = fixture.innerHTML;
+        }
       }
       var assertionCounts = {
         total: 0,
@@ -2497,8 +2502,8 @@ var ui = function(suite) {
 
       suite.beforeEach(function() {
         checkingDeferrals = false;
-        if (isBrowser) {
-          document.getElementById("qunit-fixture").innerHTML = originalFixture;
+        if (isBrowser && fixture) {
+          fixture.innerHTML = fixtureMarkup;
         }
         deferrals = 0;
         inModule = true;
