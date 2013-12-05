@@ -1,7 +1,7 @@
 {
   "name": "mocha-qunit-ui",
   "description": "An interface for Mocha that implements QUnit's API.",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "author": "Mike Pennisi <mike@mikepennisi.com>",
   "repository": {
     "type": "git",
