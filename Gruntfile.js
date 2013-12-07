@@ -13,6 +13,7 @@ module.exports = function(grunt) {
         'src/ui-head.jslike',
         'src/for-each.js',
         'src/bind.js',
+        'src/set-immediate.js',
         'src/mocha-qunit-ui.js',
         'src/ui-tail.jslike',
         'src/tail.js'

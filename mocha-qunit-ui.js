@@ -2286,6 +2286,30 @@ var bind = function(func, context) {
   };
 };
 
+var setImmediate = global.setImmediate || (function() {
+  // This implementation based on dbaron's work in "setTimeout with a shorter
+  // delay"
+  // http://dbaron.org/log/20100309-faster-timeouts
+  var timeouts = [];
+  var messageName = "zero-timeout-message";
+
+  function handleMessage(event) {
+    if (event.source == window && event.data == messageName) {
+      event.stopPropagation();
+      if (timeouts.length > 0) {
+        timeouts.shift()();
+      }
+    }
+  }
+
+  window.addEventListener("message", handleMessage, true);
+
+  return function(fn) {
+    timeouts.push(fn);
+    window.postMessage(messageName, "*");
+  };
+}());
+
 var isBrowser = 'document' in global;
 var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
@@ -2586,12 +2610,12 @@ var ui = function(suite) {
       deferrals -= count;
       if (deferrals === 0 && !checkingDeferrals) {
         checkingDeferrals = true;
-        setTimeout(function() {
+        setImmediate(function() {
           checkingDeferrals = false;
           if (deferrals === 0 && currentDoneFn) {
             currentDoneFn(checkAssertions());
           }
-        }, 0);
+        });
       } else if (deferrals < 0) {
         throw new Error("cannot call start() when not stopped");
       }

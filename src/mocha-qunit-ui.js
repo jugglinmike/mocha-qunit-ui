@@ -298,12 +298,12 @@ var ui = function(suite) {
       deferrals -= count;
       if (deferrals === 0 && !checkingDeferrals) {
         checkingDeferrals = true;
-        setTimeout(function() {
+        setImmediate(function() {
           checkingDeferrals = false;
           if (deferrals === 0 && currentDoneFn) {
             currentDoneFn(checkAssertions());
           }
-        }, 0);
+        });
       } else if (deferrals < 0) {
         throw new Error("cannot call start() when not stopped");
       }
