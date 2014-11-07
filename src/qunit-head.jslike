@@ -1,4 +1,4 @@
-(function() {
+(function(global) {
 // Shadow the global exports so that QUnit does not attempt to define itself
 // via CommonJS in such environments.
 var exports;

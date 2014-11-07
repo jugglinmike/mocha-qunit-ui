@@ -8,4 +8,4 @@ if (_addEventListener.wasDefined) {
 } else {
   delete global.addEventListener;
 }
-}());
+}(this));
