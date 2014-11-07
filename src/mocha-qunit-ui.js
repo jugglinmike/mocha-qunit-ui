@@ -263,6 +263,9 @@ var ui = function(suite) {
           passed: assertionCounts.passed,
           failed: assertionCounts.failed,
           name: this.currentTest.title,
+          runtime: this.currentTest.duration,
+          // The `duration` attribute was depcrecated in QUnit version 1.13.0
+          // TODO: Remove this attribute when it is removed from QUnit
           duration: this.currentTest.duration
         });
         done(checkAssertionCount());
