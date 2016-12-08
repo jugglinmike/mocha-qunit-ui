@@ -2560,6 +2560,7 @@ var ui = function(suite) {
       });
     });
     global.ok = assert.ok;
+    QUnit.ok = assert.ok;
   };
 
   suite.on('pre-require', function(context) {
@@ -2751,11 +2752,11 @@ var ui = function(suite) {
      * with the given `title`, an optional number of assertions to expect,
      * callback `test` acting as a thunk.
      */
-    context.test = normalizeTestArgs(function(title, expect, test) {
+    context.test = QUnit.test = normalizeTestArgs(function(title, expect, test) {
       addTest(title, expect, test);
     });
 
-    context.asyncTest = normalizeTestArgs(function(title, expect, test) {
+    context.asyncTest = QUnit.asyncTest = normalizeTestArgs(function(title, expect, test) {
       addTest(title, expect, wrapTestFunction(test, function(test, done) {
         context.stop();
         test.call(this, assert);
