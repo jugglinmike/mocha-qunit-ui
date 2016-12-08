@@ -104,8 +104,11 @@ module.exports = function(grunt) {
 
 ## Running tests
 
-Just run `npm test` from the project directory. You can run QUnit's test suite
-by opening `test/qunit.html` in a browser.
+1. Install dependencies: `npm install`
+2. Update QUnit submodule `git submodule update --init --recursive`
+3. `npm test`
+
+You can run QUnit's test suite by opening `test/qunit.html` in a browser.
 
 ## License
 
