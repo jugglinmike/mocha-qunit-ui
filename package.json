@@ -12,11 +12,14 @@
     "grunt-contrib-concat": "~0.3.0",
     "grunt-mocha": "~0.4.6",
     "grunt-mocha-test": "~0.8.0",
+    "jshint": "^2.9.4",
     "mocha": "^3.2.0"
   },
   "main": "mocha-qunit-ui.js",
   "scripts": {
-    "test": "grunt test"
+    "lint": "jshint src test",
+    "test": "npm run lint && npm run test-unit",
+    "test-unit": "grunt test"
   },
   "licenses": [
     {

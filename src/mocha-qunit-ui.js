@@ -1,3 +1,4 @@
+/* globals require: false */
 var isBrowser = 'document' in global;
 var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
@@ -45,7 +46,6 @@ var ui = function(suite) {
     }
   }
 
-  var secret = {};
   var logCallbacks = {};
   var logFnNames = [
     "begin", "done", "moduleStart", "moduleDone", "testStart", "testDone",
@@ -112,8 +112,6 @@ var ui = function(suite) {
     }
   }
 
-  var push = QUnit.push;
-  var ok = assert.ok;
   var spy = function(obj, name, fn) {
     var orig = obj[name];
     if (orig.reset) {
@@ -122,7 +120,7 @@ var ui = function(suite) {
     var spied = obj[name] = function() {
       var res = orig.apply(this, arguments);
       fn.apply(this, arguments);
-      return orig.apply(this, arguments);
+      return res;
     };
     spied.reset = function() {
       obj[name] = orig;
@@ -229,7 +227,12 @@ var ui = function(suite) {
       });
 
       if (opts) {
-        suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
+        suite.beforeEach(function() {
+          for (var k in opts) {
+            this[k] = opts[k];
+          }
+        });
+
         if (opts.setup) {
           suite.beforeEach(function(done) {
             stop();
@@ -249,8 +252,8 @@ var ui = function(suite) {
       }
       suite.afterEach(function(done) {
         forEach(config.current._assertions, function(assertion) {
-          var state = test.state;
           assertionCounts.total++;
+
           if (assertion.result) {
             assertionCounts.passed++;
           } else {
@@ -282,7 +285,7 @@ var ui = function(suite) {
     };
 
     // Deprecated since QUnit v1.9.0, but still used, e.g. by Backbone.
-    assert.raises = assert.throws
+    assert.raises = assert.throws;
 
     /**
     * Checks to see if the assertion counts indicate a failure.
@@ -293,7 +296,8 @@ var ui = function(suite) {
       if(expectedAssertions > 0 && expectedAssertions != actualCount) {
         return new Error("Expected "+ expectedAssertions +
           " assertions but saw " + actualCount);
-      };
+      }
+
       return null;
     };
 
@@ -369,7 +373,7 @@ var ui = function(suite) {
     });
 
     context.asyncTest = QUnit.asyncTest = normalizeTestArgs(function(title, expect, test) {
-      addTest(title, expect, wrapTestFunction(test, function(test, done) {
+      addTest(title, expect, wrapTestFunction(test, function(test) {
         context.stop();
         test.call(this, assert);
       }));

@@ -2319,49 +2319,84 @@ if (_addEventListener.wasDefined) {
 (function(global, undefined) {
 "use strict";
 
+/* exported forEach */
 var nativeForEach = Array.prototype.forEach;
 var oKeys = Object.keys || function(obj) {
-  if (obj !== Object(obj)) throw new TypeError('Invalid object');
-  var keys = [];
-  for (var key in obj) if (Object.hasOwnProperty.call(obj, key)) {
-    keys.push(key);
+  var key, keys;
+
+  if (obj !== Object(obj)) {
+    throw new TypeError('Invalid object');
   }
+
+  keys = [];
+
+  for (key in obj) {
+    if (Object.hasOwnProperty.call(obj, key)) {
+      keys.push(key);
+    }
+  }
+
   return keys;
 };
+
 var forEach = function(obj, iterator, context) {
-  if (obj == null) return;
+  var keys, i, length;
+
+  if (obj === null || obj === undefined) {
+    return;
+  }
+
   if (nativeForEach && obj.forEach === nativeForEach) {
     obj.forEach(iterator, context);
-  } else if (obj.length === +obj.length) {
-    for (var i = 0, length = obj.length; i < length; i++) {
-      if (iterator.call(context, obj[i], i, obj) === breaker) return;
-    }
   } else {
-    var keys = oKeys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
+    keys = oKeys(obj);
+
+    for (i = 0, length = keys.length; i < length; i++) {
       iterator.call(context, obj[keys[i]], keys[i], obj);
     }
   }
 };
 
+/* exported bind */
 var nativeBind = Function.prototype.bind;
 var slice = Array.prototype.slice;
+
 var bind = function(func, context) {
   var args, bound;
-  if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-  if (typeof func !== 'function') throw new TypeError;
+
+  if (nativeBind && func.bind === nativeBind) {
+    return nativeBind.apply(func, slice.call(arguments, 1));
+  }
+
+  if (typeof func !== 'function') {
+    throw new TypeError();
+  }
+
   args = slice.call(arguments, 2);
-  return bound = function() {
-    if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+
+  bound = function() {
+    var self, result, ctor;
+
+    if (!(this instanceof bound)) {
+      return func.apply(context, args.concat(slice.call(arguments)));
+    }
+
     ctor.prototype = func.prototype;
-    var self = new ctor;
+    self = new ctor();
     ctor.prototype = null;
-    var result = func.apply(self, args.concat(slice.call(arguments)));
-    if (Object(result) === result) return result;
+    result = func.apply(self, args.concat(slice.call(arguments)));
+
+    if (Object(result) === result) {
+      return result;
+    }
+
     return self;
   };
+
+  return bound;
 };
 
+/* exported setImmediate */
 var setImmediate = global.setImmediate || (function() {
   // This implementation based on dbaron's work in "setTimeout with a shorter
   // delay"
@@ -2386,6 +2421,7 @@ var setImmediate = global.setImmediate || (function() {
   };
 }());
 
+/* globals require: false */
 var isBrowser = 'document' in global;
 var Mocha = isBrowser ? global.Mocha : require('mocha');
 var Suite = Mocha.Suite;
@@ -2433,7 +2469,6 @@ var ui = function(suite) {
     }
   }
 
-  var secret = {};
   var logCallbacks = {};
   var logFnNames = [
     "begin", "done", "moduleStart", "moduleDone", "testStart", "testDone",
@@ -2500,8 +2535,6 @@ var ui = function(suite) {
     }
   }
 
-  var push = QUnit.push;
-  var ok = assert.ok;
   var spy = function(obj, name, fn) {
     var orig = obj[name];
     if (orig.reset) {
@@ -2510,7 +2543,7 @@ var ui = function(suite) {
     var spied = obj[name] = function() {
       var res = orig.apply(this, arguments);
       fn.apply(this, arguments);
-      return orig.apply(this, arguments);
+      return res;
     };
     spied.reset = function() {
       obj[name] = orig;
@@ -2617,7 +2650,12 @@ var ui = function(suite) {
       });
 
       if (opts) {
-        suite.beforeEach(function() { for (var k in opts) this[k] = opts[k] });
+        suite.beforeEach(function() {
+          for (var k in opts) {
+            this[k] = opts[k];
+          }
+        });
+
         if (opts.setup) {
           suite.beforeEach(function(done) {
             stop();
@@ -2637,8 +2675,8 @@ var ui = function(suite) {
       }
       suite.afterEach(function(done) {
         forEach(config.current._assertions, function(assertion) {
-          var state = test.state;
           assertionCounts.total++;
+
           if (assertion.result) {
             assertionCounts.passed++;
           } else {
@@ -2670,7 +2708,7 @@ var ui = function(suite) {
     };
 
     // Deprecated since QUnit v1.9.0, but still used, e.g. by Backbone.
-    assert.raises = assert.throws
+    assert.raises = assert.throws;
 
     /**
     * Checks to see if the assertion counts indicate a failure.
@@ -2681,7 +2719,8 @@ var ui = function(suite) {
       if(expectedAssertions > 0 && expectedAssertions != actualCount) {
         return new Error("Expected "+ expectedAssertions +
           " assertions but saw " + actualCount);
-      };
+      }
+
       return null;
     };
 
@@ -2757,7 +2796,7 @@ var ui = function(suite) {
     });
 
     context.asyncTest = QUnit.asyncTest = normalizeTestArgs(function(title, expect, test) {
-      addTest(title, expect, wrapTestFunction(test, function(test, done) {
+      addTest(title, expect, wrapTestFunction(test, function(test) {
         context.stop();
         test.call(this, assert);
       }));

@@ -1,3 +1,4 @@
+// jshint node: true, mocha: true
 var fs = require('fs');
 var assert = require('assert');
 

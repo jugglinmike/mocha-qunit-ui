@@ -1,3 +1,4 @@
+/* exported setImmediate */
 var setImmediate = global.setImmediate || (function() {
   // This implementation based on dbaron's work in "setTimeout with a shorter
   // delay"
