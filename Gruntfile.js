@@ -6,7 +6,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     concat: {
       'mocha-qunit-ui.js': [
-        'src/head.js',
+        'src/head.jslike',
         'src/qunit-head.jslike',
         'qunit/qunit/qunit.js',
         'src/qunit-tail.jslike',
@@ -16,7 +16,7 @@ module.exports = function(grunt) {
         'src/shims/set-immediate.js',
         'src/mocha-qunit-ui.js',
         'src/ui-tail.jslike',
-        'src/tail.js'
+        'src/tail.jslike'
       ]
     },
     mocha: {
