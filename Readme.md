@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/jugglinmike/mocha-qunit-ui.svg?branch=master)](https://travis-ci.org/jugglinmike/mocha-qunit-ui)
 
-An interface for [Mocha](http://visionmedia.github.io/mocha/) that implements
+An interface for [Mocha](https://mochajs.org/) that implements
 [QUnit](http://qunitjs.com/)'s API.
 
 Mocha ships with a QUnit interface, but it lacks assertions, support for
